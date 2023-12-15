@@ -8,7 +8,7 @@ function App() {
   const [fruits, setFruits] = useState([]);
   const openFormHandler = (setInputValue) => {
     setOpenForm(!openForm);
-    if (openForm) {
+    if (setInputValue) {
       setInputValue("");
     }
   };

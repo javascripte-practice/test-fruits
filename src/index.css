@@ -5,3 +5,13 @@
   padding: 0;
   box-sizing: border-box;
 }
+
+.box {
+  background-color: aqua;
+}
+
+input:focus,
+input:active,
+input {
+  outline: none;
+}
