@@ -1,13 +1,18 @@
 import React, { useRef, useState } from "react";
 import styles from "./Form.module.css";
-import Wrapper from "../helper/Wrapper";
+import Modal from "../Modal/Modal";
 
 /*
     Components
   1. StateFull Component - StateLess Component / Presentation Component
   2. Smart Component - Dump Component
   3. Controlled - UnControlled Components
-  4. Izalation 
+  // ========  6-dars
+  1. Izalation
+  2. Errors and Modal window
+  3. LocalStorage 
+  4. useEffect hook
+  5. Clean-up function 
 
 
 */
@@ -15,10 +20,15 @@ import Wrapper from "../helper/Wrapper";
 const Form = (props) => {
   const [changeInputValue, setChangeInputValue] = useState("");
   const [changePriceInput, setChangePriceInput] = useState("");
+  // =====    bad--practice
+  // const [changeInputValue, setChangeInputValue] = props.setName;
+  // const [changePriceInput, setChangePriceInput] = props.setPrice;
   const [okPrice, setOkPrice] = useState(false);
   const [okName, setOkName] = useState(false);
   const [errName, setErrName] = useState(false);
   const [errPrice, setErrPrice] = useState(false);
+  const [error, setError] = useState("");
+
   // const [formState, setFromState] = useState({
   //   name: "",
   //   price: "",
@@ -29,10 +39,15 @@ const Form = (props) => {
 
   const submitHandler = (e) => {
     e.preventDefault();
-    if (
-      changeInputValue.trim().length < 3 ||
-      changePriceInput.trim().length < 4
-    ) {
+    if (changeInputValue.length < 3 || changePriceInput.length < 4) {
+      if (changeInputValue.length < 3) {
+        setError(() => "Nom bo'sh bo'lmasin!");
+      }
+      if (changePriceInput.length < 4) {
+        setError((err) =>
+          err ? err + " Narx bo'sh bo'lmasin!" : "Narx bo'sh bo'lmasin!"
+        );
+      }
       return;
     }
     props.setFruits((fruits) => {
@@ -53,7 +68,9 @@ const Form = (props) => {
       //   name: nameInput?.current?.value,
       //   price: priceInput?.current?.value,
       // };
-      return [...fruits, obj];
+      const value = [...fruits, obj];
+      localStorage.setItem("fruits", JSON.stringify(value));
+      return value;
     });
     // setChangeInputValue("");
     // setChangePriceInput("");
@@ -70,27 +87,29 @@ const Form = (props) => {
   // };
 
   const changePriceHandler = (e) => {
-    if (e.target.value.length > 3) {
+    const value = e?.target?.value?.trim();
+    if (value.length > 3) {
       setErrPrice(false);
       setOkPrice(true);
     }
-    if (e.target.value.length <= 3) {
+    if (value.length <= 3) {
       setErrPrice(true);
       setOkPrice(false);
     }
-    setChangePriceInput(e?.target?.value);
+    setChangePriceInput(value);
   };
 
   const changeInputHandler = (e) => {
-    if (e.target.value.length > 2) {
+    const value = e?.target?.value?.trim();
+    if (value.length > 2) {
       setErrName(false);
       setOkName(true);
     }
-    if (e.target.value.length <= 2) {
+    if (value.length <= 2) {
       setErrName(true);
       setOkName(false);
     }
-    setChangeInputValue(e.target.value);
+    setChangeInputValue(value);
   };
   //   [
   //    React.createElement("div", { className: "box" }, [
@@ -107,8 +126,13 @@ const Form = (props) => {
   4. <></>
   */
 
+  const errIsOpen = () => {
+    setError(false);
+  };
+
   return (
     <form onSubmit={submitHandler} className={styles.form}>
+      {error && <Modal isOpen={errIsOpen} message={error} />}
       <label htmlFor="">
         <input
           type="text"
@@ -139,9 +163,7 @@ const Form = (props) => {
           // name="price"
           onChange={changePriceHandler}
           value={changePriceInput}
-          className={`${errPrice ? styles.error : ""} ${
-            okPrice ? styles.success : ""
-          }`}
+          className={`${okPrice ? styles.success : ""}`}
           // onChange={inputsHandler}
           // value={formState.price}
           // ref={priceInput}
